@@ -1,6 +1,5 @@
 import random as rand
 import time
-import sys
 
 is_game_playing = True
 do_exit = False
@@ -19,15 +18,22 @@ def load_gun(ammo_count = 1):
   if ammo_count < 1: ammo_count = 1 # Must have atleast one round in the chamber
   if ammo_count > 5: ammo_count = 5 # Ensure a chance of survival
 
+  message = f"Revolver empty! Loading {ammo_count} "
+  message += "bullets.\n" if ammo_count > 1 else "bullet.\n"
+  print(message)
   i = 0
   while i < ammo_count:
-    if not cylinder[i]:
-      cylinder[rand.randint(0, 5)] = True
+    chosen_chamber = rand.randint(0, 5)
+    if not cylinder[chosen_chamber]:
+      cylinder[chosen_chamber] = True
       i += 1
 
+  #for i in range(ammo_count):
+  #  chosen_chamber = rand.randint(0, 5)
+  #  if not cylinder[chosen_chamber]:
+  #    cylinder[chosen_chamber] = True
+
 def shoot_gun():
-  if not check_cylinder():
-    load_gun(ammo_count)
   global current_chamber_index
   if cylinder[current_chamber_index]:
     cylinder[current_chamber_index] = False
@@ -99,7 +105,7 @@ def play_round():
   global current_player
 
   if not check_cylinder():
-    load_gun()
+    load_gun(ammo_count)
 
   print(f"{players[current_player]}'s turn.")
   if not is_ai[current_player]:
@@ -118,8 +124,12 @@ def play_round():
 
   check_player_killed(player_shot)
 
+print("\tRussian Roulette")
 name = input(f"Enter your name or leave blank to be called '{players[0]}': ")
-players[0] = name if name else "Player 1"
+players[0] = name if name else players[0]
+is_ai_input = input("Do you want an AI to play in your place? 'Y' for AI, blank for Human: ")
+confirm = is_ai_input[0].lower() == "y" if is_ai_input else False
+is_ai[0] = confirm
 print("How many more are with you?")
 
 while True:
@@ -132,20 +142,22 @@ while True:
 
 multiplayer_mode = num_extra_players > 0
 
-for i in range(num_extra_players):
-  name = input(f"Type a name for Player {i + 2} or leave blank for the default 'Player {i + 2}': ")
+for i in range(1, num_extra_players + 1):
+  name = input(f"Type a name for Player {i + 1} or leave blank for the default 'Player {i + 1}': ")
   if name:
     players.append(name)
   else:
-    players.append("Player " + str(i + 2))
-  is_ai_input = input("Is this player an AI? 'Y' for AI, blank for Human: ")[0].lower() == "y"
-  is_ai.append(is_ai_input)
+    players.append("Player " + str(i + 1))
+  is_ai_input = input("Is this player an AI? 'Y' for AI, blank for Human: ")
+  confirm = is_ai_input[0].lower() == "y" if is_ai_input else False
+  is_ai.append(confirm)
 
+print(f"Number of players: {len(players)}")
 ammo_count = int(input("Enter the number of bullets in the revolver (No less than 1 and no more than 5): "))
 
 if multiplayer_mode:
   current_player = rand.randint(0, len(players) - 1)
-  print(f"The game begins with {players[current_player]}.")
+  print(f"\n\nThe game begins with {players[current_player]}.")
 else:
   print("Begin!")
 
